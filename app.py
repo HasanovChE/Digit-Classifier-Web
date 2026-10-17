@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 import pandas as pd
+import numpy as np
 from config import CANVAS_SIZE, STROKE_WIDTH
 from model_loader import load_pytorch_model, load_tensorflow_model
 from preprocessing import preprocess_canvas
@@ -79,9 +80,26 @@ canvas_result = st_canvas(
     key=f"digit_canvas_{st.session_state.canvas_key}"
 )
 
+uploaded_file = st.file_uploader(
+    "Or upload an image",
+    type=["png", "jpg", "jpeg"]
+)
+
+from PIL import Image
+
+input_image_data=None
+
+if uploaded_file:
+    uploaded_image = Image.open(uploaded_file).convert("RGBA")
+    st.image(uploaded_image, caption="Uploaded image")
+    input_image_data = np.array(uploaded_image)
+elif canvas_result.image_data is not None and canvas_result.image_data[..., :3].min() < 255:
+    input_image_data = canvas_result.image_data
+
+
 # PREDICTION
-if canvas_result.image_data is not None:
-    if canvas_result.image_data[..., :3].max() > 0:
+if input_image_data is not None:
+    if input_image_data[..., :3].max() > 0:
         
         if not use_pt and not use_tf:
             st.warning("Please select at least one model framework from the top checkboxes!")
@@ -97,7 +115,7 @@ if canvas_result.image_data is not None:
                     if pt_model is None:
                         st.error("PyTorch model could not be loaded.")
                     else:
-                        tensor_pt, img_pt = preprocess_canvas(canvas_result.image_data, "pytorch")
+                        tensor_pt, img_pt = preprocess_canvas(input_image_data, "pytorch")
                         res_pt = predict(pt_model, tensor_pt, "pytorch")
 
                         log_prediction(res_pt[0]['digit'], res_pt)                        
@@ -119,7 +137,7 @@ if canvas_result.image_data is not None:
                     if tf_model is None:
                         st.error("TensorFlow model could not be loaded.")
                     else:
-                        tensor_tf, img_tf = preprocess_canvas(canvas_result.image_data, "tensorflow")
+                        tensor_tf, img_tf = preprocess_canvas(input_image_data, "tensorflow")
                         res_tf = predict(tf_model, tensor_tf, "tensorflow")
                         
                         log_prediction(res_tf[0]['digit'], res_tf)
