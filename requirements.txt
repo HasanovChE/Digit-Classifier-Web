@@ -1,0 +1,9 @@
+streamlit>=1.53
+streamlit-drawable-canvas>=0.10.0
+numpy
+pandas
+pillow
+matplotlib
+torch
+torchvision
+tensorflow

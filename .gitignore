@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+
+# Logs and data
+logs/
+*.log
+*.csv
+
+# # Models
+# models/
+
+# OS specific
+.DS_Store
+Thumbs.db
